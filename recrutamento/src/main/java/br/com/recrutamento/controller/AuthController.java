@@ -1,5 +1,7 @@
 package br.com.recrutamento.controller;
 
+import br.com.recrutamento.security.jwt.UserDetailsImpl;
+import br.com.recrutamento.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,25 +23,18 @@ import br.com.recrutamento.service.AuthService;
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     private JwtUtils jwtUtils;
 
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String jwt = authService.generateJwtToken(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
+        String jwt = authService.authenticateUser(loginRequest.getUsername(), loginRequest.getPassword());
+        UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(loginRequest.getUsername());
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
     }
 }

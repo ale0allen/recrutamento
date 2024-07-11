@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -36,10 +37,16 @@ public class JobController {
         return new ResponseEntity<>(jobs, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Job> getJobById(@PathVariable Long id) {
+        Optional<Job> job = jobService.getJobById(id);
+        return job.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
     @PostMapping("/apply")
     public ResponseEntity<Void> applyForJob(@RequestParam Long jobId, Principal principal) {
         jobService.applyForJob(jobId, principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
-

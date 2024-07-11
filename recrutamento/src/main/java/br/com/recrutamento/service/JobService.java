@@ -32,6 +32,10 @@ public class JobService {
         return jobRepository.findAll();
     }
 
+    public Optional<Job> getJobById(Long id) {
+        return jobRepository.findById(id);
+    }
+
     public void applyForJob(Long jobId, String username) {
         Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
         Optional<AppUser> optionalUser = userRepository.findByUsername(username);
